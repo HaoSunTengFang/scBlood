@@ -1,0 +1,148 @@
+import pandas as pd
+
+# Placeholder for python conversion of the R data manipulation code
+python_data_manipulation_code = """
+# Assuming we have a DataFrame called rate_df_plot similar to the one in R
+rate_df_plot['variable'] = pd.Categorical(rate_df_plot['variable'], categories=gene.show[::-1], ordered=True)
+
+sub_ix_dict = {gene: "1-50" if i < 50 else "51-100" for i, gene in enumerate(gene.show)}
+rate_df_plot['subPlot'] = rate_df_plot['variable'].map(sub_ix_dict)
+
+# Handling the "bg.percent" column conditionally
+if 'bg.percent' in gene_manifest.columns:
+    bg_df = pd.DataFrame({
+        'ix': list(range(1, 51)) + list(range(1, 51)),
+        'frac': gene_manifest.loc[gene.show, 'bg.percent'][::-1],
+        'type': "Background proportion"
+    })
+    bg_df['subPlot'] = bg_df['frac'].map(sub_ix_dict)
+else:
+    bg_df = None
+"""
+
+# Note: This code assumes the existence of rate_df_plot and gene_manifest DataFrames, and gene.show list, 
+# which would be equivalent to the respective R objects.
+# The code is a general representation and may need adjustments based on actual data structures and dependencies.
+
+# python_data_manipulation_code
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Placeholder for python conversion of the R plotting code
+python_plotting_code = """
+# Setting color and style
+gene_colors = {
+    'other': "#d56f6d",
+    'ribosome': "#f29721",
+    'dissociation': "#65a55d",
+    'mitochondrial': "#3778bf"
+}
+
+sns.set_style("whitegrid")
+
+# Creating two subplots
+fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 15))
+
+# Plot for subPlot == "1-50"
+sns.boxplot(x='variable', y='value', hue='Annotation', data=rate_df_plot[rate_df_plot['subPlot'] == "1-50"],
+            palette=gene_colors, ax=ax1, fliersize=1)
+ax1.set_xlabel('')
+ax1.set_ylabel('Gene proportion of total UMI (1-50)')
+ax1.set_yscale('log')
+ax1.set_yticks([0.0001, 0.001, 0.01, 0.1, 1])
+ax1.get_yaxis().set_major_formatter(plt.ScalarFormatter())
+
+# Plot for subPlot == "51-100"
+sns.boxplot(x='variable', y='value', hue='Annotation', data=rate_df_plot[rate_df_plot['subPlot'] == "51-100"],
+            palette=gene_colors, ax=ax2, fliersize=1)
+ax2.set_xlabel('')
+ax2.set_ylabel('Gene proportion of total UMI (51-100)')
+ax2.set_yscale('log')
+ax2.set_yticks([0.0001, 0.001, 0.01, 0.1, 1])
+ax2.get_yaxis().set_major_formatter(plt.ScalarFormatter())
+
+# Adjusting legends and layout
+handles, labels = ax1.get_legend_handles_labels()
+fig.legend(handles=handles, labels=labels, loc='upper center', title="Gene:")
+ax1.get_legend().remove()
+ax2.get_legend().remove()
+
+plt.tight_layout()
+plt.show()
+"""
+
+# Note: The code assumes the existence of rate_df_plot DataFrame and gene_colors dictionary, 
+# which would be equivalent to the respective R objects.
+# The code is a general representation and may need adjustments based on actual data structures and dependencies.
+
+# python_plotting_code
+import os
+import time
+from markdown import markdown
+from bs4 import BeautifulSoup
+
+# Placeholder for python conversion of the R file operations and report generation code
+python_file_report_code = """
+# Assuming we have a function called run_sc_statistics() that performs the operations needed
+# and returns a results dictionary similar to the R function.
+
+def gen_stat_report(results, save_path):
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] -----: report generating")
+    
+    # Ensure the save_path exists
+    os.makedirs(save_path, exist_ok=True)
+    
+    results['savePath'] = os.path.normpath(save_path)
+    save_path = os.path.normpath(save_path)
+    
+    # Check and create the 'report-figures/' directory
+    report_figures_path = os.path.join(save_path, 'report-figures/')
+    os.makedirs(report_figures_path, exist_ok=True)
+    
+    # Assuming we have a markdown template "main-scStat.md" similar to the Rmd in the R code
+    with open("main-scStat.md", "r") as file:
+        markdown_content = file.read()
+    
+    # Convert markdown to HTML
+    html_content = markdown(markdown_content)
+    
+    # Save the converted HTML
+    with open(os.path.join(save_path, 'report-scStat.html'), "w") as file:
+        file.write(html_content)
+
+# Note: This code assumes the existence of a run_sc_statistics function and the necessary markdown template.
+# The code is a general representation and may need adjustments based on actual data structures, dependencies, 
+# and the specific structure of the markdown template.
+
+"""
+
+# python_file_report_code
+# Placeholder for python conversion of the R file operations and report generation code without the markdown library
+python_file_report_code_without_markdown = """
+# Assuming we have a function called run_sc_statistics() that performs the operations needed
+# and returns a results dictionary similar to the R function.
+
+def gen_stat_report(results, save_path):
+    print(f"[{time.strftime('%Y-%m-%d %H:%M:%S')}] -----: report generating")
+    
+    # Ensure the save_path exists
+    os.makedirs(save_path, exist_ok=True)
+    
+    results['savePath'] = os.path.normpath(save_path)
+    save_path = os.path.normpath(save_path)
+    
+    # Check and create the 'report-figures/' directory
+    report_figures_path = os.path.join(save_path, 'report-figures/')
+    os.makedirs(report_figures_path, exist_ok=True)
+    
+    # Assuming we have a markdown template "main-scStat.md" similar to the Rmd in the R code
+    with open("main-scStat.md", "r") as file:
+        markdown_content = file.read()
+    
+    # Here, you would typically convert markdown to HTML using the markdown library
+    # and then save the converted HTML. Since the library is not available in this environment,
+    # I'm skipping that step.
+    # You would add that step when executing this code in your own environment.
+
+"""
+

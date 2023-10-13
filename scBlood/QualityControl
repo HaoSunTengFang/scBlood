@@ -1,30 +1,43 @@
 import pandas as pd
 import numpy as np
+import scanpy as sc
 
-def annoSpecies(expr_data, cell_manifest, gene_manifest, hg_mm_thres=0.9, mix_anno={"human": "hg19", "mouse": "mm10"}):
+def annoSpecies(adata, hg_mm_thres=0.9, mix_anno={"human": "hg19", "mouse": "mm10"}):
     
     # Extract species information based on the EnsemblID column
-    gene_manifest['Species'] = gene_manifest['EnsemblID'].str[:4]
+    adata.var['Species'] = adata.var['EnsemblID'].str[:4]
     
     # Calculate the sum of each column
-    nUMI = expr_data.sum(axis=0)
+    nUMI = np.sum(adata.X, axis=0).A1 if isinstance(adata.X, np.matrix) else np.sum(adata.X, axis=0)
     
     # Extract human genes and calculate their fraction
-    hg_genes = gene_manifest[gene_manifest['Species'] == mix_anno["human"]]['Symbol']
-    umiHgFrac = expr_data.loc[hg_genes].sum(axis=0) / nUMI
+    hg_genes = adata.var[adata.var['Species'] == mix_anno["human"]].index
+    umiHgFrac = np.sum(adata[:, hg_genes].X, axis=0).A1 / nUMI
     
     # Extract mouse genes and calculate their fraction
-    mm_genes = gene_manifest[gene_manifest['Species'] == mix_anno["mouse"]]['Symbol']
-    umiMmFrac = expr_data.loc[mm_genes].sum(axis=0) / nUMI
+    mm_genes = adata.var[adata.var['Species'] == mix_anno["mouse"]].index
+    umiMmFrac = np.sum(adata[:, mm_genes].X, axis=0).A1 / nUMI
     
     # Assign species label based on the calculated fractions and the threshold
     cell_species = np.repeat("middle", len(umiHgFrac))
     cell_species[umiHgFrac >= hg_mm_thres] = "human"
     cell_species[umiMmFrac >= hg_mm_thres] = "mouse"
     
-    cell_manifest['umiHgFrac'] = umiHgFrac.values
+    adata.obs['umiHgFrac'] = umiHgFrac
+    adata.obs['umiMmFrac'] = umiMmFrac
+    adata.obs['cell.species'] = cell_species
     
-    return cell_manifest
+    return adata
+
+def getSingleSpecies(adata, species="human", mix_anno={"human": "hg19", "mouse": "mm10"}):
+    
+    # Use the previously defined function to get species annotation
+    adata_annotated = annoSpecies(adata, mix_anno=mix_anno)
+    
+    # Filter the AnnData object based on the specified species
+    adata_filtered = adata_annotated[adata_annotated.obs['cell.species'] == species, :]
+    
+    return adata_filtered
 
 
 # Placeholder for python conversion of the R data manipulation code
